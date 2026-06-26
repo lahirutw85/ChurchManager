@@ -9,6 +9,7 @@ const firebaseConfig = {
     storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "church-manager-e3124.firebasestorage.app",
     messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "39535536696",
     appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:39535536696:web:bfe767ba56fcf3d71914cd",
+    measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "G-P5J7MZF9VQ",
 };
 
 if (!import.meta.env.VITE_FIREBASE_API_KEY) {
