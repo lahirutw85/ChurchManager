@@ -66,4 +66,6 @@ export const router = createBrowserRouter([
             },
         ],
     },
-]);
+], {
+    basename: '/ChurchManager'
+});
