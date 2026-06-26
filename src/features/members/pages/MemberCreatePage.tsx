@@ -3,6 +3,9 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
+import { createMember } from "../api/members.api";
+import { queryClient } from "../../../lib/queryClient";
+
 
 const memberSchema = z.object({
     // Personal
@@ -99,19 +102,27 @@ export const MemberCreatePage = () => {
         watch,
     } = useForm<MemberFormValues>({
         defaultValues,
-        resolver: zodResolver(memberSchema),
+        resolver: zodResolver(memberSchema) as any,
         mode: "onTouched",
     });
 
     const baptismStatus = watch("baptismStatus");
 
     async function onSubmit(values: MemberFormValues) {
-        // TODO: replace with API call
-        // await membersApi.create(values)
-        console.log("CREATE MEMBER:", values);
-
-        navigate("/members");
+        try {
+            const status = values.memberStatus === 'Inactive' ? 'inactive' : 'active';
+            await createMember({
+                ...values,
+                status
+            });
+            await queryClient.invalidateQueries({ queryKey: ["members"] });
+            navigate("/members");
+        } catch (error) {
+            console.error("Failed to create member:", error);
+            alert("Failed to create member. See console for details.");
+        }
     }
+
 
     return (
         <div className="space-y-6 max-w-5xl mx-auto pb-20">

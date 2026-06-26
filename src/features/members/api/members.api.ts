@@ -1,36 +1,68 @@
-// import { apiClient } from '@/lib/apiClient';
+import { collection, getDocs, getDoc, doc, addDoc, updateDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 import type { Member } from '../types';
 
+const MEMBERS_COLLECTION = 'members';
+
 export const getMembers = async (): Promise<Member[]> => {
-    // Mock data for demo purposes since backend isn't ready
-    // In real app: return await apiClient.get('/members');
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            resolve([
-                { id: '1', firstName: 'John', lastName: 'Doe', email: 'john.doe@example.com', phone: '123-456-7890', status: 'active', ministry: 'Worship Team' },
-                { id: '2', firstName: 'Jane', lastName: 'Smith', email: 'jane.smith@example.com', phone: '987-654-3210', status: 'active', ministry: 'Kids Ministry' },
-                { id: '3', firstName: 'Robert', lastName: 'Johnson', email: 'bob.j@example.com', phone: '555-019-2834', status: 'inactive' },
-                { id: '4', firstName: 'Sarah', lastName: 'Williams', email: 'sarah.w@example.com', phone: '555-928-1736', status: 'active', ministry: 'Welcome Team' },
-                { id: '5', firstName: 'Michael', lastName: 'Brown', email: 'm.brown@example.com', phone: '555-827-3645', status: 'active' },
-            ]);
-        }, 800); // Simulate network delay
-    });
+    try {
+        const querySnapshot = await getDocs(collection(db, MEMBERS_COLLECTION));
+        const members: Member[] = [];
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            members.push({
+                id: doc.id,
+                firstName: data.firstName || '',
+                lastName: data.lastName || '',
+                email: data.email || '',
+                phone: data.phone || '',
+                status: data.status || 'active',
+                ...data
+            } as Member);
+        });
+        return members;
+    } catch (error) {
+        console.error('Error fetching members from Firestore:', error);
+        throw error;
+    }
 };
 
 export const getMember = async (id: string): Promise<Member | undefined> => {
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            // In a real app we would fetch by ID. Here we just find it in the mock array.
-            // We need to move MOCK_MEMBERS out of the function scope or duplicate logic for now.
-            const MOCK_MEMBERS: Member[] = [
-                { id: '1', firstName: 'John', lastName: 'Doe', email: 'john.doe@example.com', phone: '123-456-7890', status: 'active', ministry: 'Worship Team' },
-                { id: '2', firstName: 'Jane', lastName: 'Smith', email: 'jane.smith@example.com', phone: '987-654-3210', status: 'active', ministry: 'Kids Ministry' },
-                { id: '3', firstName: 'Robert', lastName: 'Johnson', email: 'bob.j@example.com', phone: '555-019-2834', status: 'inactive' },
-                { id: '4', firstName: 'Sarah', lastName: 'Williams', email: 'sarah.w@example.com', phone: '555-928-1736', status: 'active', ministry: 'Welcome Team' },
-                { id: '5', firstName: 'Michael', lastName: 'Brown', email: 'm.brown@example.com', phone: '555-827-3645', status: 'active' },
-            ];
-            const member = MOCK_MEMBERS.find(m => m.id === id);
-            resolve(member);
-        }, 500);
-    });
+    try {
+        const docRef = doc(db, MEMBERS_COLLECTION, id);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+            return { id: docSnap.id, ...docSnap.data() } as Member;
+        }
+        return undefined;
+    } catch (error) {
+        console.error(`Error fetching member with id ${id} from Firestore:`, error);
+        throw error;
+    }
+};
+
+export const createMember = async (data: Omit<Member, 'id'>): Promise<Member> => {
+    try {
+        const docRef = await addDoc(collection(db, MEMBERS_COLLECTION), {
+            ...data,
+            createdAt: new Date().toISOString()
+        });
+        return { id: docRef.id, ...data } as Member;
+    } catch (error) {
+        console.error('Error creating member in Firestore:', error);
+        throw error;
+    }
+};
+
+export const updateMember = async (id: string, data: Partial<Member>): Promise<void> => {
+    try {
+        const docRef = doc(db, MEMBERS_COLLECTION, id);
+        await updateDoc(docRef, {
+            ...data,
+            updatedAt: new Date().toISOString()
+        });
+    } catch (error) {
+        console.error(`Error updating member with id ${id} in Firestore:`, error);
+        throw error;
+    }
 };

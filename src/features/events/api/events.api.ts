@@ -1,63 +1,58 @@
+import { collection, getDocs, getDoc, doc, addDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 import type { Event, CreateEventDTO } from '../types';
 
-const MOCK_EVENTS: Event[] = [
-    {
-        id: '1',
-        name: 'Sunday Service',
-        date: '2024-03-24',
-        time: '09:00',
-        location: 'Main Sanctuary',
-        description: 'Regular Sunday worship service.',
-        type: 'service',
-        status: 'scheduled'
-    },
-    {
-        id: '2',
-        name: 'Youth Bible Study',
-        date: '2024-03-27',
-        time: '18:30',
-        location: 'Youth Hall',
-        description: 'Weekly bible study for teens.',
-        type: 'meeting',
-        status: 'scheduled'
-    },
-    {
-        id: '3',
-        name: 'Community Picnic',
-        date: '2024-04-01',
-        time: '12:00',
-        location: 'City Park',
-        description: 'Annual church picnic.',
-        type: 'social',
-        status: 'scheduled'
-    }
-];
+const EVENTS_COLLECTION = 'events';
 
 export const getEvents = async (): Promise<Event[]> => {
-    return new Promise((resolve) => {
-        setTimeout(() => resolve([...MOCK_EVENTS]), 600);
-    });
+    try {
+        const querySnapshot = await getDocs(collection(db, EVENTS_COLLECTION));
+        const events: Event[] = [];
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            events.push({
+                id: doc.id,
+                name: data.name || '',
+                date: data.date || '',
+                time: data.time || '',
+                location: data.location || '',
+                description: data.description || '',
+                type: data.type || 'other',
+                status: data.status || 'scheduled',
+                ...data
+            } as Event);
+        });
+        return events;
+    } catch (error) {
+        console.error('Error fetching events from Firestore:', error);
+        throw error;
+    }
 };
 
 export const getEvent = async (id: string): Promise<Event | undefined> => {
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            const event = MOCK_EVENTS.find(e => e.id === id);
-            resolve(event);
-        }, 500);
-    });
+    try {
+        const docRef = doc(db, EVENTS_COLLECTION, id);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+            return { id: docSnap.id, ...docSnap.data() } as Event;
+        }
+        return undefined;
+    } catch (error) {
+        console.error(`Error fetching event with id ${id} from Firestore:`, error);
+        throw error;
+    }
 };
 
 export const createEvent = async (data: CreateEventDTO): Promise<Event> => {
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            const newEvent: Event = {
-                ...data,
-                id: Math.random().toString(36).substr(2, 9),
-                status: 'scheduled'
-            };
-            MOCK_EVENTS.push(newEvent);
-            resolve(newEvent);
-        }, 800);
-    });
+    try {
+        const docRef = await addDoc(collection(db, EVENTS_COLLECTION), {
+            ...data,
+            status: 'scheduled',
+            createdAt: new Date().toISOString()
+        });
+        return { id: docRef.id, status: 'scheduled', ...data } as Event;
+    } catch (error) {
+        console.error('Error creating event in Firestore:', error);
+        throw error;
+    }
 };

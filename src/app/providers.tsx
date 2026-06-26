@@ -10,7 +10,7 @@ type AppProviderProps = {
 export const AppProvider = ({ children }: AppProviderProps) => {
     return (
         <QueryClientProvider client={queryClient}>
-            <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+            <ThemeProvider storageKey="vite-ui-theme">
                 {children}
             </ThemeProvider>
         </QueryClientProvider>

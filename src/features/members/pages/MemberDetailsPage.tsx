@@ -83,16 +83,20 @@ export const MemberDetailsPage = () => {
                             </CardHeader>
                             <CardContent className="space-y-2 text-sm">
                                 <div className="flex justify-between">
-                                    <span className="text-gray-500">First Visit</span>
-                                    <span>Jan 12, 2024</span>
+                                    <span className="text-gray-500">Date of Birth</span>
+                                    <span>{member.dob || '-'}</span>
                                 </div>
                                 <div className="flex justify-between">
-                                    <span className="text-gray-500">Baptism</span>
-                                    <span>-</span>
+                                    <span className="text-gray-500">Baptism Status / Date</span>
+                                    <span>
+                                        {member.baptismStatus === 'Baptized' 
+                                            ? `Baptized (${member.baptismDate || 'Date missing'})` 
+                                            : 'Not Baptized'}
+                                    </span>
                                 </div>
                                 <div className="flex justify-between">
-                                    <span className="text-gray-500">Membership Date</span>
-                                    <span>Mar 01, 2024</span>
+                                    <span className="text-gray-500">Joined Date</span>
+                                    <span>{member.joinedDate || '-'}</span>
                                 </div>
                             </CardContent>
                         </Card>
@@ -107,9 +111,32 @@ export const MemberDetailsPage = () => {
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-center py-8 text-gray-500">
-                                No family members linked yet.
-                            </div>
+                            {member.householdName || member.spouseName ? (
+                                <div className="space-y-3 text-sm">
+                                    {member.householdName && (
+                                        <div className="flex justify-between border-b pb-2">
+                                            <span className="text-gray-500 font-medium">Household Name</span>
+                                            <span>{member.householdName}</span>
+                                        </div>
+                                    )}
+                                    {member.spouseName && (
+                                        <div className="flex justify-between border-b pb-2">
+                                            <span className="text-gray-500 font-medium">Spouse Name</span>
+                                            <span>{member.spouseName}</span>
+                                        </div>
+                                    )}
+                                    {member.childrenCount !== undefined && (
+                                        <div className="flex justify-between pb-2">
+                                            <span className="text-gray-500 font-medium">Children Count</span>
+                                            <span>{member.childrenCount}</span>
+                                        </div>
+                                    )}
+                                </div>
+                            ) : (
+                                <div className="text-center py-8 text-gray-500">
+                                    No family members linked yet.
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
                 </TabsContent>

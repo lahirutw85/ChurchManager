@@ -1,9 +1,30 @@
 export type Member = {
     id: string;
+    memberNo?: string;
     firstName: string;
     lastName: string;
-    email: string;
-    phone: string;
+    email?: string;
+    phone?: string;
     status: 'active' | 'inactive';
+    gender?: 'Male' | 'Female' | 'Other';
+    dob?: string;
+    nicOrPassport?: string;
+    addressLine1?: string;
+    addressLine2?: string;
+    city?: string;
+    country?: string;
+    householdName?: string;
+    maritalStatus?: 'Single' | 'Married' | 'Widowed' | 'Divorced';
+    spouseName?: string;
+    childrenCount?: number;
+    joinedDate?: string;
+    baptismStatus?: 'Not Baptized' | 'Baptized';
+    baptismDate?: string;
+    previousChurch?: string;
+    emergencyName?: string;
+    emergencyRelationship?: string;
+    emergencyPhone?: string;
+    notes?: string;
     ministry?: string;
 };
+
